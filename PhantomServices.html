@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Phantom Systems - Version 1.2</title>
+<style>
+:root{
+  --bg:#06080f; --panel:#0b0f19; --panel2:#0e1422; --ink:#cfe6ff; --muted:#8aa0b7;
+  --accent:#2fff88; --accent2:#77ffc8; --danger:#ff5c7a; --warn:#ffd679;
+  --grid: rgba(255,255,255,0.04); --glass: rgba(255,255,255,0.03);
+  --mono: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:radial-gradient(1200px 800px at 10% -10%, #0b1b33 0,#06080f 45%); background-attachment: fixed;}
+body{color:var(--ink);font-family:var(--sans);}
+
+.app{min-height:100vh;display:flex;flex-direction:column}
+.nav{
+  height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px;
+  background:linear-gradient(90deg, rgba(255,255,255,0.04), transparent);
+  border-bottom:1px solid rgba(255,255,255,0.05)
+}
+.dot{width:10px;height:10px;border-radius:50%}
+.d1{background:#5ffb91}.d2{background:#ffd679}.d3{background:#ff7b9b}
+.brand{font-weight:700;letter-spacing:.3px}
+.tab{padding:8px 10px;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;user-select:none}
+.tab.active{background:var(--glass);color:var(--ink);box-shadow:0 0 0 1px rgba(255,255,255,0.06) inset}
+.spacer{flex:1}
+.badge{font-size:12px;color:var(--muted);padding:6px 8px;border-radius:8px;background:var(--glass)}
+.switch{cursor:pointer}
+
+.main{display:grid;grid-template-columns: 1.2fr .9fr; gap:12px; padding:12px;}
+.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid rgba(255,255,255,0.05);
+  border-radius:14px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.panel h3{margin:0 0 8px 0;font-weight:700;letter-spacing:.2px}
+.help{font-size:13px;color:var(--muted)}
+
+.screen{height:56vh;padding:10px;border-radius:10px;background:#041018;border:1px solid rgba(255,255,255,.06);
+  overflow:auto;font-family:var(--mono);font-size:13px}
+.log .fade{opacity:.92}
+.row{display:flex;gap:10px;align-items:center;margin-top:10px}
+.prompt{min-width:150px;color:var(--muted);font-family:var(--mono)}
+.cmd{flex:1;font-family:var(--mono);padding:10px 12px;border-radius:8px;background:transparent;color:var(--ink);
+  border:1px dashed rgba(255,255,255,.08);outline:none;font-size:13px}
+.kbd{font-size:12px;color:var(--muted);padding:6px 8px;border-radius:6px;background:rgba(255,255,255,.05)}
+
+.rightcol .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:rgba(0,0,0,.22);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.06)}
+.metric{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.big{font-size:22px;font-weight:700}
+.progress{height:10px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+.progress>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.spark{height:54px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent);position:relative;overflow:hidden}
+.spark b{position:absolute;bottom:0;width:2px;background:rgba(255,255,255,.4)}
+.hr{height:1px;background:rgba(255,255,255,.06);margin:8px 0}
+
+.tools-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.tool{padding:12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.07);cursor:pointer}
+.tool .t{font-weight:700}
+.small{font-size:12px;color:var(--muted)}
+
+.vault-list{display:flex;flex-direction:column;gap:8px;max-height:48vh;overflow:auto}
+.file{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+.file .name{font-weight:600}
+
+.footer{display:flex;gap:10px;align-items:center;padding:10px 14px;color:var(--muted);font-size:12px}
+.cursor{display:inline-block;width:8px;height:14px;background:var(--accent);margin-left:6px;border-radius:2px;animation:blink 1s steps(2) infinite}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.theme-green{--accent:#2fff88;--accent2:#77ffc8;--panel:#07140d;--panel2:#071c12;background:radial-gradient(1200px 800px at 10% -10%, #05240f 0,#06080f 45%)}
+.theme-purple{--accent:#bb86fc;--accent2:#82d1ff;--panel:#120a1f;--panel2:#1a0f2d;background:radial-gradient(1200px 800px at 10% -10%, #1e0d33 0,#06080f 45%)}
+.theme-crt{--accent:#9aff00;--accent2:#68ffbe;--panel:#061403;--panel2:#071a05;filter:contrast(1.1) saturate(1.15)}
+@media (max-width: 980px){ .main{grid-template-columns:1fr} .screen{height:50vh} }
+</style>
+</head>
+<body class="theme-green">
+<div class="app" id="app">
+<!-- LOGIN OVERLAY — device-binding version -->
+<style>
+  #phantomLoginOverlay{ position: absolute; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(180deg, rgba(2,6,10,0.92), rgba(2,6,10,0.95)); backdrop-filter: blur(6px); }
+  #phantomLoginCard{ width:420px; max-width:92vw; border-radius:12px; padding:18px;
+    background: linear-gradient(180deg, rgba(6,12,20,0.95), rgba(8,14,24,0.9));
+    border:1px solid rgba(255,255,255,0.04); box-shadow:0 10px 40px rgba(0,0,0,.6); color:var(--ink); font-family:var(--mono); }
+  #phantomLoginCard h2{margin:0 0 10px 0;font-weight:700}
+  .phantom-row{display:flex;gap:8px;margin:8px 0;align-items:center}
+  .phantom-input{flex:1;padding:10px;border-radius:8px;border:1px dashed rgba(255,255,255,.06);background:transparent;color:var(--ink)}
+  .phantom-btn{padding:8px 12px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,.06);cursor:pointer;color:var(--muted)}
+  .phantom-btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#001; font-weight:700; border:none}
+  .phantom-role{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.04);cursor:pointer}
+  .phantom-role.active{box-shadow:inset 0 0 0 2px rgba(255,255,255,.03);background:rgba(255,255,255,.02)}
+  .phantom-small{font-size:12px;color:var(--muted);margin-top:8px}
+  .phantom-link{color:var(--accent);cursor:pointer;text-decoration:underline;font-size:13px}
+  .phantom-disabled{opacity:.45; pointer-events:none}
+</style>
+
+<div id="phantomLoginOverlay" aria-hidden="false">
+  <div id="phantomLoginCard" role="dialog" aria-label="Phantom login">
+    <h2>Phantom Systems — Authenticate</h2>
+
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div id="roleUser" class="phantom-role active">User</div>
+      <div id="roleAdmin" class="phantom-role">Admin</div>
+    </div>
+
+    <div id="loginForm">
+      <div class="phantom-row">
+        <input id="phantomPassword" class="phantom-input" type="password" placeholder="Enter password">
+        <button id="phantomLoginBtn" class="phantom-btn primary">Log in</button>
+      </div>
+
+      <div class="phantom-row" style="justify-content:space-between">
+        <div class="phantom-small">
+          <span id="resetUserPw" class="phantom-link">Reset user password</span>
+          <span id="resetHint" class="phantom-small" style="color:var(--muted);margin-left:8px">(requires this device registered)</span>
+        </div>
+        <div class="phantom-small">Role: <strong id="currentRoleLabel">User</strong></div>
+      </div>
+    </div>
+
+    <div id="adminControls" style="display:none;margin-top:10px">
+      <div class="phantom-small">Admin scan collects a device fingerprint to remember this admin session.</div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+        <button id="logoutAdminBtn" class="phantom-btn">Logout Admin</button>
+        <div style="flex:1"></div>
+        <div id="adminScanStatus" class="phantom-small">Not registered</div>
+      </div>
+    </div>
+
+    <div class="phantom-small" style="margin-top:12px;color:var(--muted)">
+      Devices registered: <strong id="devicesCount">0</strong> • You can unregister a device from this overlay when logged in.
+    </div>
+  </div>
+</div>
+
+<script>
+/* Device-binding login overlay
+   - No devices are registered initially.
+   - On first successful login from a device, that device is recorded and will be remembered.
+   - User password reset is disabled until the device used becomes registered.
+   - All data stored locally in localStorage. Keys are namespaced for clarity.
+*/
+
+/* ---------- CONFIG ---------- */
+const DEFAULT_USER_PW = 'PhantomRocksAB3CD1AE';
+const DEFAULT_ADMIN_PW = 'ADMINPHANTOMACN31JANAJAGULOR';
+
+/* ---------- storage keys ---------- */
+const KEY_DEVICES = 'phantom_devices_v2';       // JSON map: { fpHash: {role: 'user'|'admin', ts: <epoch>, label: <string>} }
+const KEY_CUR_DEVICE = 'phantom_current_device';// current device hash (for quick reference)
+const KEY_USER_PW = 'phantom_user_pw_v2';       // user password (initially DEFAULT_USER_PW)
+
+/* ---------- DOM ---------- */
+const overlay = document.getElementById('phantomLoginOverlay');
+const roleUser = document.getElementById('roleUser');
+const roleAdmin = document.getElementById('roleAdmin');
+const pwInput = document.getElementById('phantomPassword');
+const loginBtn = document.getElementById('phantomLoginBtn');
+const currentRoleLabel = document.getElementById('currentRoleLabel');
+const resetUserPwLink = document.getElementById('resetUserPw');
+const adminControls = document.getElementById('adminControls');
+const adminScanStatus = document.getElementById('adminScanStatus');
+const logoutAdminBtn = document.getElementById('logoutAdminBtn');
+const devicesCountEl = document.getElementById('devicesCount');
+const resetHint = document.getElementById('resetHint');
+
+let selectedRole = 'user';
+
+/* ---------- helpers ---------- */
+function loadDevices(){ try{ return JSON.parse(localStorage.getItem(KEY_DEVICES) || '{}'); }catch(e){ return {}; } }
+function saveDevices(obj){ localStorage.setItem(KEY_DEVICES, JSON.stringify(obj)); updateDeviceCount(); }
+function getUserPw(){ return localStorage.getItem(KEY_USER_PW) || DEFAULT_USER_PW; }
+function setUserPw(v){ localStorage.setItem(KEY_USER_PW, v); appendToConsole('User password updated locally.'); }
+function setCurrentDeviceHash(h){ localStorage.setItem(KEY_CUR_DEVICE, h); }
+function getCurrentDeviceHash(){ return localStorage.getItem(KEY_CUR_DEVICE); }
+function appendToConsole(html){
+  try{
+    const mainLog = document.getElementById('log');
+    if(mainLog){ const d=document.createElement('div'); d.className='fade'; d.innerHTML=html; mainLog.appendChild(d); mainLog.scrollTop=mainLog.scrollHeight; }
+  }catch(e){ /* ignore */ }
+}
+function updateDeviceCount(){ const d = loadDevices(); devicesCountEl.textContent = Object.keys(d).length; }
+
+/* deterministic-ish device fingerprint derived from UA/platform/timezone */
+function deviceFingerprint(){
+  const ua = navigator.userAgent || '';
+  const platform = navigator.platform || '';
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  const base = ua + '|' + platform + '|' + tz;
+  // tiny hash function
+  let h = 2166136261 >>> 0;
+  for(let i=0;i<base.length;i++){ h = Math.imul(h ^ base.charCodeAt(i), 16777619) >>> 0; }
+  // keep short hex
+  return 'fp_' + (h.toString(16));
+}
+
+/* check whether this device is registered */
+function deviceIsRegistered(fp){
+  const devs = loadDevices();
+  return !!devs[fp];
+}
+
+/* register device with a role */
+function registerDevice(fp, role){
+  const devs = loadDevices();
+  devs[fp] = { role, ts: Date.now(), label: navigator.platform || 'device' };
+  saveDevices(devs);
+  setCurrentDeviceHash(fp);
+  appendToConsole(`<div class="small">${role.toUpperCase()} registered for device ${esc(fp)}</div>`);
+}
+
+/* remove registration for current device */
+function unregisterCurrentDevice(){
+  const fp = getCurrentDeviceHash();
+  if(!fp) return;
+  const devs = loadDevices();
+  if(devs[fp]){ delete devs[fp]; saveDevices(devs); appendToConsole(`<div class="small">Device ${esc(fp)} unregistered</div>`); }
+  localStorage.removeItem(KEY_CUR_DEVICE);
+}
+
+/* helper escape for console append */
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]); }
+
+/* ---------- UI behaviors ---------- */
+function setRole(role){
+  selectedRole = role;
+  roleUser.classList.toggle('active', role==='user');
+  roleAdmin.classList.toggle('active', role==='admin');
+  currentRoleLabel.textContent = role==='user' ? 'User' : 'Admin';
+  adminControls.style.display = role==='admin' ? 'block' : 'none';
+  // reset password field for clarity
+  pwInput.value = '';
+  updateResetAvailability();
+  checkAdminStatus();
+}
+roleUser.addEventListener('click', ()=> setRole('user'));
+roleAdmin.addEventListener('click', ()=> setRole('admin'));
+
+function updateResetAvailability(){
+  // Only allow user password reset if this device is registered
+  const fp = deviceFingerprint();
+  if(deviceIsRegistered(fp)){
+    resetUserPwLink.classList.remove('phantom-disabled');
+    resetHint.textContent = '(device registered — can reset)';
+  } else {
+    resetUserPwLink.classList.add('phantom-disabled');
+    resetHint.textContent = '(requires this device registered)';
+  }
+}
+function checkAdminStatus(){
+  const fp = deviceFingerprint();
+  if(deviceIsRegistered(fp) && loadDevices()[fp].role === 'admin'){
+    adminScanStatus.textContent = 'Admin registered';
+  } else adminScanStatus.textContent = 'Not registered';
+}
+
+/* ---------- login flow ---------- */
+loginBtn.addEventListener('click', ()=> {
+  const entered = (pwInput.value || '').trim();
+  if(!entered){ appendToConsole('<div class="small">No password entered.</div>'); return; }
+  const fp = deviceFingerprint();
+  if(selectedRole === 'user'){
+    // must match stored user password
+    const stored = getUserPw();
+    if(entered === stored){
+      // register device if not already
+      if(!deviceIsRegistered(fp)) registerDevice(fp, 'user');
+      setCurrentDeviceHash(fp);
+      appendToConsole(`<div class="small">User login: success</div>`);
+      overlay.style.display = 'none';
+    } else {
+      appendToConsole(`<div class="small" style="color:var(--warn)">User login failed</div>`);
+    }
+  } else {
+    // admin path — exact admin password required
+    if(entered === DEFAULT_ADMIN_PW){
+      // register device as admin and remember
+      if(!deviceIsRegistered(fp)) registerDevice(fp, 'admin'); else {
+        // upgrade existing registration to admin if it was user
+        const devs = loadDevices(); devs[fp].role = 'admin'; saveDevices(devs);
+      }
+      setCurrentDeviceHash(fp);
+      appendToConsole(`<div class="small">Admin login: success — device registered</div>`);
+      overlay.style.display = 'none';
+    } else {
+      appendToConsole(`<div class="small" style="color:var(--warn)">Admin login failed</div>`);
+    }
+  }
+  updateResetAvailability();
+  checkAdminStatus();
+});
+
+/* reset user password — only if device registered */
+resetUserPwLink.addEventListener('click', ()=>{
+  const fp = deviceFingerprint();
+  if(!deviceIsRegistered(fp)){
+    appendToConsole('<div class="small" style="color:var(--warn)">This device is not registered — cannot reset password.</div>');
+    return;
+  }
+  const newPw = prompt('Enter a new user password (stored locally):', getUserPw());
+  if(newPw !== null && newPw !== ''){
+    setUserPw(newPw);
+  }
+});
+
+/* logout admin for current device (unregister) */
+logoutAdminBtn.addEventListener('click', ()=>{
+  const fp = deviceFingerprint();
+  const devs = loadDevices();
+  if(devs[fp]){ delete devs[fp]; saveDevices(devs); appendToConsole('<div class="small">Current device unregistered.</div>'); }
+  localStorage.removeItem(KEY_CUR_DEVICE);
+  updateResetAvailability();
+  checkAdminStatus();
+});
+
+/* when opening page: initial rules
+   - start with zero registered devices (if none stored)
+   - overlay is visible until a successful login registers current device or an existing registration for this device exists.
+*/
+(function initOverlay(){
+  // ensure user password key exists (but keep secret unless device registers)
+  if(!localStorage.getItem(KEY_USER_PW)) localStorage.setItem(KEY_USER_PW, DEFAULT_USER_PW);
+
+  updateDeviceCount();
+
+  const fp = deviceFingerprint();
+  // If this device is already registered, auto-hide overlay (remembered)
+  if(deviceIsRegistered(fp)){
+    // mark current device
+    setCurrentDeviceHash(fp);
+    overlay.style.display = 'none';
+    appendToConsole('<div class="small">Device recognized — session restored.</div>');
+    return;
+  }
+
+  // Otherwise do not auto-register or show reset. Require credentials.
+  overlay.style.display = 'flex';
+  updateResetAvailability();
+  checkAdminStatus();
+
+  // wire Enter key
+  pwInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') loginBtn.click(); });
+})();
+
+/* Expose a small debug helper to clear registrations (optional)
+   Use in browser console: phantom_clearRegistrations()
+*/
+window.phantom_clearRegistrations = function(){
+  localStorage.removeItem(KEY_DEVICES);
+  localStorage.removeItem(KEY_CUR_DEVICE);
+  updateDeviceCount();
+  appendToConsole('<div class="small">All device registrations cleared.</div>');
+  // if overlay hidden, bring it back so next visit requires login
+  overlay.style.display = 'flex';
+};
+
+</script>
+
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+    <div class="brand">Phantom Systems</div>
+    <div class="tab active" data-tab="dashboard">Dashboard</div>
+    <div class="tab" data-tab="terminal">Terminal</div>
+    <div class="tab" data-tab="tools">Tools</div>
+    <div class="tab" data-tab="vault">Vault</div>
+    <div class="spacer"></div>
+    <div class="badge">Extended timings: <span id="realState">OFF</span></div>
+    <div class="badge">Speed <input id="speed" type="range" min="0.25" max="3" step="0.25" value="1" style="vertical-align:middle"> <span id="speedVal">1x</span></div>
+    <div class="tab switch" id="toggleReal">Toggle</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="dashboardMain">
+    <!-- LEFT COLUMN -->
+    <div class="panel">
+      <h3 id="panelTitle">Console</h3>
+      <div class="screen" id="screen">
+        <div id="log" class="log"></div>
+      </div>
+      <div class="row">
+        <div class="prompt" id="prompt">operator@phantom:~$</div>
+        <input id="cmd" class="cmd" autocomplete="off" spellcheck="false" placeholder='type "help" for commands'>
+        <div class="kbd">Enter ↵</div>
+      </div>
+      <div class="hr"></div>
+      <div class="help">Logs: <span id="logCount">0</span> • Files: <span id="fileCount">0</span> • Mode: <span id="modeText">Standard</span></div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="rightcol">
+      <div class="grid">
+        <div class="card">
+          <div class="metric">Uplink</div>
+          <div class="big" id="uplinkState">LINK STABLE</div>
+          <div class="progress" style="margin-top:8px"><i id="uplinkBar"></i></div>
+        </div>
+        <div class="card">
+          <div class="metric">Entropy Beacon</div>
+          <div class="big" id="beaconVal">0.00</div>
+          <div class="spark" id="spark"></div>
+        </div>
+        <div class="card">
+          <div class="metric">Runtime</div>
+          <div class="big" id="runtime">00:00:00</div>
+        </div>
+        <div class="card">
+          <div class="metric">Session</div>
+          <div class="big" id="sessionId"></div>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="card">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="tab active" data-jump="terminal">Open Terminal</div>
+          <div class="tab" data-jump="tools">Open Tools</div>
+          <div class="tab" data-jump="vault">Open Vault</div>
+          <div class="tab" id="clearBtn">Clear Console</div>
+          <div class="tab" id="exportBtn">Export Files</div>
+          <div class="tab" id="importBtn">Import Files</div>
+        </div>
+      </div>
+      <div class="hr"></div>
+      <div class="card">
+        <div class="metric">Quick Presets</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <div class="tab" onclick="runCommand('inflog www.example.com')">Inflog example.com</div>
+          <div class="tab" onclick="runCommand('inflog all www.example.com')">Inflog all example.com</div>
+          <div class="tab" onclick="runCommand('trace www.example.com')">Trace</div>
+          <div class="tab" onclick="runCommand('portsweep www.example.com')">PortSweep</div>
+          <div class="tab" onclick="runCommand('sniffer 6')">Sniffer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOOLS PAGE -->
+  <div class="main" id="toolsPage" style="display:none">
+    <div class="panel">
+      <h3>Tools</h3>
+      <div class="tools-list" id="toolsList">
+        <div class="tool" onclick="runCommand('netmap grid')"><div class="t">NetMap</div><div class="small">ASCII topology map</div></div>
+        <div class="tool" onclick="runCommand('trace www.example.com')"><div class="t">Trace</div><div class="small">Hop list with latencies</div></div>
+        <div class="tool" onclick="runCommand('portsweep www.example.com')"><div class="t">PortSweep</div><div class="small">Open/closed port display</div></div>
+        <div class="tool" onclick="runCommand('packetview 8')"><div class="t">PacketView</div><div class="small">Hex dump stream</div></div>
+        <div class="tool" onclick="runCommand('sniffer 10')"><div class="t">Sniffer</div><div class="small">Random headers & ids</div></div>
+        <div class="tool" onclick="runCommand('cipher rot13 \"HELLO WORLD\"')"><div class="t">CipherLab</div><div class="small">rot13/xor/base64</div></div>
+        <div class="tool" onclick="runCommand('hash sha256 \"phantom\"')"><div class="t">Hash</div><div class="small">sha1/sha256/md5*</div></div>
+        <div class="tool" onclick="runCommand('keyforge 32')"><div class="t">KeyForge</div><div class="small">Random key material</div></div>
+        <div class="tool" onclick="runCommand('uplink')"><div class="t">Uplink</div><div class="small">Toggle link state</div></div>
+        <div class="tool" onclick="runCommand('beacon')"><div class="t">Beacon</div><div class="small">Entropy pulse</div></div>
+        <div class="tool" onclick="runCommand('screen')"><div class="t">Screen</div><div class="small">Matrix feed</div></div>
+        <div class="tool" onclick="runCommand('theme green')"><div class="t">Theme: Green</div><div class="small">Matrix vibes</div></div>
+        <div class="tool" onclick="runCommand('theme purple')"><div class="t">Theme: Purple</div><div class="small">Cyberpunk</div></div>
+        <div class="tool" onclick="runCommand('theme crt')"><div class="t">Theme: CRT</div><div class="small">Old-school glow</div></div>
+        <div class="tool" onclick="runCommand('inflog www.example.com')"><div class="t">Inflog</div><div class="small">Prep a target</div></div>
+        <div class="tool" onclick="runCommand('grabify www.example.com')"><div class="t">Grabify</div><div class="small">Resolve host info</div></div>
+        <div class="tool" onclick="runCommand('powergrab www.example.com')"><div class="t">PowerGrab</div><div class="small">Extraction sequence</div></div>
+        <div class="tool" onclick="runCommand('cat inflog')"><div class="t">Report</div><div class="small">Analyze last inflog</div></div>
+        <div class="tool" onclick="runCommand('self destruct')"><div class="t" style="color:var(--danger)">Self Destruct</div><div class="small">Erase session</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Inspector</h3>
+      <div class="screen" id="inspector" style="height:66vh"></div>
+    </div>
+  </div>
+
+  <!-- VAULT PAGE -->
+  <div class="main" id="vaultPage" style="display:none">
+    <div class="panel">
+      <h3>Vault</h3>
+      <div class="vault-list" id="vault"></div>
+    </div>
+    <div class="panel">
+      <h3>Actions</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="tab" id="exportBtn2">Export Files</div>
+        <div class="tab" id="importBtn2">Import Files</div>
+        <div class="tab" onclick="runCommand('cat inflog')">Generate Latest Report</div>
+        <div class="tab" onclick="runCommand('clear')">Clear Console</div>
+      </div>
+      <div class="hr"></div>
+      <div class="screen" id="vaultPreview" style="height:56vh"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>© Phantom Systems</div>
+    <div class="spacer"></div>
+    <div>Session started: <span id="since"></span></div>
+  </div>
+</div>
+
+<script>
+/* Phantom Systems — front-end only (local state) */
+
+const $ = sel => document.querySelector(sel);
+const logEl = $('#log'), input = $('#cmd'), screenEl = $('#screen'), inspector = $('#inspector');
+const logCountEl = $('#logCount'), fileCountEl = $('#fileCount'), modeText = $('#modeText');
+const speed = $('#speed'), speedVal = $('#speedVal'), realState = $('#realState');
+const uplinkBar = $('#uplinkBar'), uplinkState = $('#uplinkState'), beaconVal = $('#beaconVal'), spark = $('#spark');
+const since = $('#since'), runtime = $('#runtime'), sessionIdEl = $('#sessionId');
+const vaultList = $('#vault'), vaultPreview = $('#vaultPreview');
+
+let extended = false;
+let startTs = Date.now();
+let lastCmd = '';
+let sessionId = Math.random().toString(36).slice(2,9).toUpperCase();
+let FS = loadFS();                  // {files: {name: {content, meta}}, …}
+let INFLOG = {};                    // last inflog targets, by shortname
+let THEME = 'green';
+let SCREEN = false;
+
+// Auto-restore recent logs (cap 500 entries)
+restoreLogs();
+
+function now(){ return new Date().toLocaleString(); }
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]); }
+function rand(a,b){ return Math.floor(a + Math.random()*(b-a+1)); }
+function chance(p){ return Math.random()<p; }
+function speedFactor(){ return 1 / (parseFloat(speed.value)||1); }
+function duration(minS,maxS,forceLong=false){
+  const base = (minS + Math.random()*(maxS-minS))*1000;
+  const factor = extended ? 1 : 0.08;
+  const longPad = forceLong && extended ? Math.max(base, 10*60*1000) : base;
+  return Math.max(600, longPad * factor) * speedFactor();
+}
+
+function appendLog(html){
+  const d=document.createElement('div'); d.className='fade'; d.innerHTML=html;
+  logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight; updateCounts(); persistLogs();
+}
+function setInspector(html){ inspector && (inspector.innerHTML = html); }
+function clearLog(){ logEl.innerHTML=''; appendLog('<span class="small">Console cleared.</span>'); persistLogs(); }
+function updateCounts(){ logCountEl.textContent=logEl.children.length; fileCountEl.textContent=Object.keys(FS.files).length; }
+
+function persistLogs(){
+  try{
+    const arr=[...logEl.children].slice(-500).map(n=>n.innerHTML);
+    localStorage.setItem('phantom_logs', JSON.stringify(arr));
+  }catch(e){}
+}
+function restoreLogs(){
+  try{
+    const raw=localStorage.getItem('phantom_logs'); if(!raw) return;
+    const arr=JSON.parse(raw); arr.forEach(h=>{ const d=document.createElement('div'); d.className='fade'; d.innerHTML=h; logEl.appendChild(d); });
+  }catch(e){}
+}
+
+function loadFS(){
+  try{ const raw=localStorage.getItem('phantom_fs_site'); if(raw) return JSON.parse(raw); }catch(e){}
+  const fresh={files:{}}; localStorage.setItem('phantom_fs_site', JSON.stringify(fresh)); return fresh;
+}
+function saveFS(){ localStorage.setItem('phantom_fs_site', JSON.stringify(FS)); updateVault(); updateCounts(); }
+function updateVault(){
+  if(!vaultList) return;
+  vaultList.innerHTML='';
+  const names=Object.keys(FS.files);
+  if(!names.length){ vaultList.innerHTML='<div class="small">No files</div>'; return; }
+  names.forEach(n=>{
+    const row=document.createElement('div'); row.className='file';
+    row.innerHTML=`<div><div class="name">${esc(n)}</div><div class="small">${esc(FS.files[n].meta)}</div></div>
+    <div style="display:flex;gap:8px"><div class="small" style="cursor:pointer" onclick="openFile('${encodeURIComponent(n)}')">view</div>
+    <div class="small" style="cursor:pointer" onclick="delFile('${encodeURIComponent(n)}')">del</div></div>`;
+    vaultList.appendChild(row);
+  });
+}
+window.openFile = (enc)=> {
+  const name=decodeURIComponent(enc); const f=FS.files[name];
+  const html = `<div class="small">File: <strong>${esc(name)}</strong></div><pre style="white-space:pre-wrap;margin-top:6px;padding:10px;border-radius:8px;background:rgba(255,255,255,.03)">${esc(f.content)}</pre>`;
+  appendLog(html); if(vaultPreview) vaultPreview.innerHTML = html;
+}
+window.delFile = (enc)=> { const name=decodeURIComponent(enc); delete FS.files[name]; saveFS(); appendLog(`Deleted: <strong>${esc(name)}</strong>`); }
+
+function exportFiles(){
+  const blob=new Blob([JSON.stringify(FS.files,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='phantom_vault.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  appendLog('Vault exported.');
+}
+function importFiles(cbDone){
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json';
+  inp.onchange=()=>{ const f=inp.files[0]; if(!f) return;
+    const rd=new FileReader(); rd.onload=()=>{ try{
+      const obj=JSON.parse(rd.result); Object.entries(obj).forEach(([k,v])=>FS.files[k]=v);
+      saveFS(); appendLog('Vault imported.');
+    }catch(e){ appendLog('<span class="danger">Invalid file</span>'); } cbDone && cbDone(); };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+
+/* ---------- NAV ---------- */
+document.querySelectorAll('.tab[data-tab]').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    const tab=el.getAttribute('data-tab');
+    $('#panelTitle').textContent = tab==='dashboard'?'Console':tab.charAt(0).toUpperCase()+tab.slice(1);
+    document.getElementById('dashboardMain').style.display = (tab==='dashboard' || tab==='terminal')?'grid':'none';
+    $('#toolsPage').style.display = tab==='tools'?'grid':'none';
+    $('#vaultPage').style.display = tab==='vault'?'grid':'none';
+  });
+});
+document.querySelectorAll('.tab[data-jump]').forEach(el=>{
+  el.addEventListener('click',()=>{ document.querySelector(`.tab[data-tab="${el.getAttribute('data-jump')}"]`).click(); });
+});
+
+/* ---------- STATUS WIDGETS ---------- */
+let uplink = true;
+function tickUplink(){
+  const pct = uplink ? 100 : 6;
+  uplinkBar.style.width = pct+'%';
+  uplinkState.textContent = uplink ? 'LINK STABLE' : 'LINK LOST';
+}
+function tickBeacon(){
+  const v=(Math.random()*3.3).toFixed(2); beaconVal.textContent=v;
+  // spark bars
+  spark.innerHTML=''; const W=spark.clientWidth||240; const N=60;
+  for(let i=0;i<N;i++){ const b=document.createElement('b'); b.style.left=(i*(W/N))+'px'; b.style.height=(Math.random()*spark.clientHeight)+'px'; spark.appendChild(b); }
+}
+setInterval(()=>{ const t=Date.now()-startTs; const s=Math.floor(t/1000);
+  const h=String(Math.floor(s/3600)).padStart(2,'0'); const m=String(Math.floor((s%3600)/60)).padStart(2,'0'); const ss=String(s%60).padStart(2,'0');
+  runtime.textContent=`${h}:${m}:${ss}`; }, 1000);
+setInterval(()=>{tickBeacon();},1200);
+tickUplink(); sessionIdEl.textContent=sessionId; since.textContent=new Date(startTs).toLocaleString();
+
+/* ---------- CONTROLS ---------- */
+$('#toggleReal').onclick=()=>{ extended = !extended; realState.textContent = extended?'ON':'OFF'; modeText.textContent = extended?'Extended':'Standard'; };
+$('#clearBtn').onclick=()=>clearLog(); $('#exportBtn').onclick=exportFiles; $('#exportBtn2').onclick=exportFiles;
+$('#importBtn').onclick=()=>importFiles(); $('#importBtn2').onclick=()=>importFiles();
+speed.oninput=()=>{ speedVal.textContent = speed.value + 'x'; }
+
+/* ---------- COMMANDS ---------- */
+
+const COMMANDS = {
+  help(){
+    const txt = `
+<strong>Command Index</strong>
+<pre>
+General
+  help                               Show this command list
+  clear                              Clear console
+  theme <green|purple|crt|default>   Switch theme
+  uplink                             Toggle link state
+  beacon                             Pulse the entropy beacon
+  screen [stop]                      Start/stop matrix feed
+  sysinfo                            Show environment info
+  echo <text>                        Print a line
+
+Targets & Recon
+  inflog [all] <site>                Prep a target; "all" performs an extended bruteforce sequence
+  cat inflog [rsh]                   Analyze most recent inflog; "rsh" uses extended analysis
+  grabify <site>                     Resolve host information (IP/host/country)
+  powergrab <site>                   Run an extraction + decryption sequence
+  netmap grid                        Render an ASCII topology map
+  trace <site>                       Show hop list with randomized latencies
+  portsweep <site>                   Display pseudo-open/closed ports
+  packetview <n>                     Render n hex dump lines
+  sniffer <n>                        Show n synthetic headers
+
+Crypto & Utils
+  cipher rot13 <text>                Encode/decode with ROT13
+  cipher xor <text> <key>            XOR every char with key (0-255)
+  cipher base64 <encode|decode> <text> Base64 operations
+  hash <md5|sha1|sha256> <text>      Produce a hash digest
+  keyforge [len]                     Generate random key material (default 16)
+
+Files & Session
+  vault list                         List files in vault
+  vault open <name>                  Print a file to console
+  export                             Export vault as JSON
+  import                             Import vault JSON
+  self destruct                      Erase logs & vault and end input
+</pre>`;
+    appendLog(txt);
+  },
+
+  clear(){ clearLog(); },
+
+  theme(arg){
+    const body = document.body;
+    body.classList.remove('theme-green','theme-purple','theme-crt');
+    if(arg==='green'){ body.classList.add('theme-green'); THEME='green'; }
+    else if(arg==='purple'){ body.classList.add('theme-purple'); THEME='purple'; }
+    else if(arg==='crt'){ body.classList.add('theme-crt'); THEME='crt'; }
+    else THEME='default';
+    appendLog(`Theme: <strong>${esc(THEME)}</strong>`);
+  },
+
+  uplink(){ uplink = !uplink; tickUplink(); appendLog(`Uplink: <strong>${uplink?'STABLE':'LOST'}</strong>`); },
+
+  beacon(){ tickBeacon(); appendLog(`Beacon pulse @ ${esc(beaconVal.textContent)}`); },
+
+  screen(arg){
+    if(arg==='stop'){ SCREEN=false; appendLog('Screen feed halted.'); return; }
+    if(SCREEN) { appendLog('Screen feed already running.'); return; }
+    SCREEN=true; appendLog('Screen feed started.');
+    const id = setInterval(()=>{
+      if(!SCREEN){ clearInterval(id); return; }
+      const w=60, h=10; let s='';
+      for(let y=0;y<h;y++){ for(let x=0;x<w;x++){ s += chance(.12) ? String.fromCharCode(rand(33,126)) : ' '; } s+='\n'; }
+      appendLog('<pre style="color:#77ffbb">'+esc(s)+'</pre>');
+      // safety cap
+      if(logEl.children.length>800){ clearLog(); appendLog('Feed rotated.'); }
+    }, duration(0.8,1.4,false));
+  },
+
+  sysinfo(){
+    appendLog(`<div class="small">User agent</div><pre style="white-space:pre-wrap;background:rgba(255,255,255,.03);padding:8px;border-radius:8px">${esc(navigator.userAgent)}</pre>`);
+  },
+
+  echo(...rest){ appendLog(esc(rest.join(' '))); },
+
+  // Recon block
+  inflog(flag, ...rest){
+    let isAll=false, site='';
+    if(flag==='all'){ isAll=true; site = rest.join(' '); }
+    else { site = [flag, ...rest].join(' '); }
+    site = site.trim(); if(!site){ appendLog('Usage: inflog [all] <site>'); return; }
+    const short = site.replace(/https?:\/\/|www\.|\/+/g,'') || 'target';
+    appendLog(`<div class="small">Inflogging network panel for <strong>${esc(site)}</strong>...</div>`);
+    appendLog('Searching for the hshp address..');
+    setTimeout(()=>{
+      appendLog(`<div class="small">Connection fingerprint found — opening stream.</div>`);
+      fakeBruteforce(short, isAll).then(result=>{
+        INFLOG[short] = result;
+        appendLog(`<div class="small">Inflog result: <strong>${esc(result.ip)}</strong> — fingerprint saved. Try "cat inflog".</div>`);
+      });
+    }, duration(1,4,false));
+  },
+
+  'cat inflog'(flag){
+    const keys=Object.keys(INFLOG); if(!keys.length){ appendLog('No inflog entries found.'); return; }
+    const target=keys[keys.length-1]; const isRsh = (flag==='rsh');
+    appendLog(`Analyzing inflog for <strong>${esc(target)}</strong> — running sweep...`);
+    const seq = ["collecting headers","enumerating endpoints","assembling payload","decrypting records"];
+    let i=0, id=setInterval(()=>{ appendLog(`<div class="small">${seq[i]} — ${rand(1000,999999)}</div>`); i++; if(i>=seq.length){clearInterval(id); finalizeReport(target);} }, 600*speedFactor());
+  },
+
+  grabify(site){
+    if(!site){ appendLog('Usage: grabify <site>'); return; }
+    const short = site.replace(/https?:\/\/|www\.|\/+/g,'');
+    appendLog(`GRABIFY — resolving host info for <strong>${esc(site)}</strong>`);
+    setTimeout(()=>{
+      const ip = genIP(); const fp = INFLOG[short]?.fp || fingerprint(short);
+      appendLog(`<div class="small">Host IP: <strong>${ip}</strong></div>`);
+      appendLog(`<div class="small">Host: ${esc(fp.host)} • Server: ${esc(fp.server)} • Country: ${esc(fp.country)}</div>`);
+    }, duration(1,6,false));
+  },
+
+  powergrab(site){
+    if(!site){ appendLog('Usage: powergrab <site>'); return; }
+    const short = site.replace(/https?:\/\/|www\.|\/+/g,'');
+    appendLog(`PowerGrab initiated for <strong>${esc(site)}</strong> — running extraction sequence.`);
+    const steps=['enumerating DB','dumping blobs','running decryptor','validating records']; let idx=0;
+    const id=setInterval(()=>{ appendLog(`<div class="small">⚙️ ${steps[idx]} — ${rand(1000,999999)}</div>`); idx++; if(idx>=steps.length){clearInterval(id); setTimeout(()=>{ const fn = `${short||'site'}_data_${Date.now()}.txt`; const content = `# data dump for ${site}\n# ${now()}\n\nuser: alice\nhash: ${rand(1000000000,9999999999)}\nmeta: record`; FS.files[fn]={content, meta:`Data dump • ${content.length}B`}; saveFS(); appendLog(`<div class="small">Extraction finished — output: <strong>${esc(fn)}</strong></div>`); }, 600*speedFactor()); }}, 600*speedFactor());
+  },
+
+  netmap(type){
+    const map = `
+┌───────────────┐        ┌───────────────┐         ┌───────────────┐
+│  EDGE NODE A  ├───┐ ┌──┤  CORE ROUTER  ├──┐  ┌───┤  EDGE NODE B  │
+└───────────────┘   │ │  └───────────────┘  │  │   └───────────────┘
+                    │ │                     │  │
+                ┌───▼─▼──┐              ┌───▼──▼──┐
+                │  HUB 1 │              │  HUB 2  │
+                └───┬────┘              └────┬────┘
+                    │                        │
+                ┌───▼───────┐           ┌────▼──────┐
+                │  CLIENTS  │           │  CLIENTS  │
+                └───────────┘           └───────────┘`;
+    appendLog(`<pre>${esc(map)}</pre>`);
+  },
+
+  trace(site){
+    if(!site){ appendLog('Usage: trace <site>'); return; }
+    const hops = rand(5,10);
+    let out = `\nTracing route to ${site} over ${hops} hops\n\n`;
+    for(let i=1;i<=hops;i++){
+      out += `${String(i).padStart(2,' ')}  ${genIP()}  ${rand(2,180)}ms  ${rand(2,180)}ms  ${rand(2,180)}ms\n`;
+    }
+    appendLog(`<pre>${esc(out)}</pre>`);
+  },
+
+  portsweep(site){
+    if(!site){ appendLog('Usage: portsweep <site>'); return; }
+    const base=[21,22,25,53,80,110,123,143,443,445,587,993,3306,3389,8080,27017];
+    const out = base.map(p=>`${String(p).padStart(5,' ')}  ${chance(.45)?'OPEN':'CLOSED'}`).join('\n');
+    appendLog(`<pre>PORT   STATE\n${out}</pre>`);
+  },
+
+  packetview(n='8'){
+    const lines = Math.max(1, Math.min(64, parseInt(n)||8));
+    let s=''; for(let i=0;i<lines;i++){
+      let hex='', ascii='';
+      for(let j=0;j<16;j++){ const b=rand(0,255); hex+=b.toString(16).padStart(2,'0')+' '; ascii+= (b>=32&&b<127)?String.fromCharCode(b):'.';}
+      s+= `${String(i*16).padStart(6,'0')}  ${hex} ${ascii}\n`;
+    }
+    appendLog(`<pre>${esc(s)}</pre>`);
+  },
+
+  sniffer(n='8'){
+    const lines=Math.max(1,Math.min(50,parseInt(n)||8));
+    let s=''; for(let i=0;i<lines;i++){ s+=`hdr:${rand(1000,999999)} len=${rand(40,1500)} id=${rand(10000,99999)}\n`; }
+    appendLog(`<pre>${esc(s)}</pre>`);
+  },
+
+  cipher(kind, a, b){
+    if(kind==='rot13'){
+      const t=(a||'').toString(); const map=c=> String.fromCharCode(c.charCodeAt(0)+(c.toLowerCase()<'n'?13:-13));
+      const out = t.replace(/[a-z]/gi, map); appendLog(`<pre>${esc(out)}</pre>`); return;
+    }
+    if(kind==='xor'){
+      const t=(a||'').toString(), key=parseInt(b)||0; let out='';
+      for(let i=0;i<t.length;i++) out += String.fromCharCode(t.charCodeAt(i) ^ key);
+      appendLog(`<pre>${esc(out)}</pre>`); return;
+    }
+    if(kind==='base64'){
+      if(a==='encode'){ appendLog(`<pre>${esc(btoa(b||''))}</pre>`); return; }
+      if(a==='decode'){ try{ appendLog(`<pre>${esc(atob(b||''))}</pre>`);}catch(e){ appendLog('<span class="danger">Invalid base64</span>'); } return; }
+    }
+    appendLog('Usage: cipher rot13 <text> | cipher xor <text> <key> | cipher base64 <encode|decode> <text>');
+  },
+
+  async hash(kind, ...rest){
+    const text = rest.join(' '); if(!text){ appendLog('Usage: hash <md5|sha1|sha256> <text>'); return; }
+    if(kind==='md5'){ appendLog(`<pre>${esc(md5(text))}</pre>`); return; }
+    const algo = (kind==='sha1')?'SHA-1':'SHA-256';
+    const buf = new TextEncoder().encode(text);
+    const digest = Array.from(new Uint8Array(await crypto.subtle.digest(algo, buf))).map(b=>b.toString(16).padStart(2,'0')).join('');
+    appendLog(`<pre>${esc(digest)}</pre>`);
+  },
+
+  keyforge(len='16'){
+    const n=Math.max(4,Math.min(1024,parseInt(len)||16));
+    const arr=new Uint8Array(n); crypto.getRandomValues(arr);
+    const out=Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');
+    appendLog(`<pre>${esc(out)}</pre>`);
+  },
+
+  // Files
+  vault(sub, name){
+    if(sub==='list'){ updateVault(); const names=Object.keys(FS.files); appendLog('<pre>'+esc(names.join('\n')||'(empty)')+'</pre>'); return; }
+    if(sub==='open'){ if(!name){ appendLog('Usage: vault open <name>'); return; } const f=FS.files[name]; if(!f){ appendLog('Not found'); return; } openFile(encodeURIComponent(name)); return; }
+    appendLog('Usage: vault list | vault open <name>');
+  },
+
+  export(){ exportFiles(); },
+  import(){ importFiles(); },
+
+  'self destruct'(){
+    appendLog('<span class="danger">Self destruct sequence initiated.</span>');
+    const id=setInterval(()=>appendLog(`<div class="small">Wiping sectors ${rand(0,9999)}</div>`), 400*speedFactor());
+    setTimeout(()=>{ clearInterval(id); localStorage.removeItem('phantom_fs_site'); localStorage.removeItem('phantom_logs'); FS={files:{}}; INFLOG={}; updateVault();
+      appendLog('<div class="small">All traces removed. Interface closing…</div>'); input.disabled=true; input.placeholder='Console closed.'; }, duration(2,8,false));
+  }
+};
+
+/* Recon helpers */
+function genIP(){ return `${rand(13,223)}.${rand(0,255)}.${rand(0,255)}.${rand(2,254)}`; }
+function fingerprint(site){
+  return { title:`${site} — ${['Portal','API','Edge','Blog'][rand(0,3)]}`, country:['US','DE','FR','GB','CA','NL','SG'][rand(0,6)],
+    host:`host${rand(10,9999)}.edge`, server:['nginx/1.18.0','Apache/2.4.41','Cloudflare','GSE','LiteSpeed'][rand(0,4)],
+    ssl:Math.random()>0.5?'TLS 1.2':'TLS 1.3', contact:`admin@${site}` };
+}
+function fakeBruteforce(short, isAll){
+  return new Promise(resolve=>{
+    const start=Date.now(); appendLog(`<div class="progress" style="margin-top:6px"><i id="pb-${start}"></i></div>`);
+    const bar = document.getElementById(`pb-${start}`);
+    const num=document.createElement('div'); num.className='small'; num.textContent='keys: initializing...'; logEl.appendChild(num); logEl.scrollTop=logEl.scrollHeight;
+    const total = isAll ? duration(600,720,true) : duration(6,50,false);
+    const tick=Math.max(40, 180*speedFactor());
+    const iv = setInterval(()=>{
+      const elapsed = Date.now()-start; const pct = Math.min(100, Math.floor((elapsed/total)*100));
+      if(bar) bar.style.width = pct + '%';
+      num.textContent = `bruteforce: ${rand(100000,999999)} ${rand(1000,9999)} ${rand(0,1)?'OK':'TRY'} — ${pct}%`;
+      if(elapsed>=total){
+        clearInterval(iv);
+        num.textContent = `bruteforce: complete — ${pct}%`;
+        const ip = genIP();
+        const fp = fingerprint(short);
+        setTimeout(()=>{
+          appendLog(`<div class="small">Target: <strong>${esc(short)}</strong> — resolved to <strong>${ip}</strong></div>`);
+          appendLog(`<div class="small">Server: ${esc(fp.server)} • Host: ${esc(fp.host)} • SSL: ${esc(fp.ssl)}</div>`);
+          resolve({ip, fp, meta: `Inflogged ${now()}`});
+        }, 300*speedFactor());
+      }
+    }, tick);
+  });
+}
+function finalizeReport(target){
+  const name = `${target.replace(/[:\/]+/g,'')}.txt`;
+  // ensure INFLOG has fp for this target (it should after inflog)
+  if(!INFLOG[target]) INFLOG[target] = { fp: fingerprint(target) };
+  const content = `--- Exfil report for ${target} ---
+Timestamp: ${now()}
+
+Fingerprint:
+${JSON.stringify(INFLOG[target].fp, null, 2)}
+
+Notes:
+- Observed marker: MARK-${rand(1000,9999)}
+- Open ports: ${rand(1,6)},${rand(10,99)}
+- Contact: ${INFLOG[target].fp.contact}
+
+End of report.
+`;
+  FS.files[name] = { content, meta: `Generated ${now()} • size ${content.length}B` };
+  saveFS();
+  appendLog(`<div class="small">Analysis complete — saved: <strong>${esc(name)}</strong></div>`);
+}
+
+/* ---------- INPUT + EXEC ---------- */
+
+function runCommand(raw){
+  if(!raw) return;
+  lastCmd = raw;
+  appendLog(`<span class="small">➜</span> <span class="small" style="color:var(--muted)">${esc(raw)}</span>`);
+  // tokenization that keeps quoted strings together
+  const parts = raw.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+  for(let i=0;i<parts.length;i++) parts[i] = parts[i].replace(/^"(.*)"$/,'$1');
+  const cmd = (parts[0]||'').toLowerCase();
+  const args = parts.slice(1);
+
+  // multi-word / special mapping
+  if(cmd === 'cat' && args[0] && args[0].toLowerCase() === 'inflog'){
+    const flag = args[1]; COMMANDS['cat inflog'](flag); return;
+  }
+  if(cmd === 'self' && args[0] && args[0].toLowerCase() === 'destruct'){
+    COMMANDS['self destruct'](); return;
+  }
+  if(COMMANDS[cmd]){
+    try{ COMMANDS[cmd].apply(null, args); }catch(e){ appendLog(`<div class="small">Error: ${esc(e.message)}</div>`); }
+    return;
+  }
+  // Some commands use name same as verb (e.g., 'powergrab') — handle direct call:
+  if(cmd === 'powergrab'){ COMMANDS.powergrab(args.join(' ')); return; }
+  if(cmd === 'inflog'){ COMMANDS.inflog.apply(null, args); return; }
+  if(cmd === 'grabify'){ COMMANDS.grabify(args.join(' ')); return; }
+  if(cmd === 'portsweep'){ COMMANDS.portsweep(args.join(' ')); return; }
+  if(cmd === 'trace'){ COMMANDS.trace(args.join(' ')); return; }
+  if(cmd === 'netmap'){ COMMANDS.netmap(args[0]); return; }
+  if(cmd === 'cipher'){ COMMANDS.cipher.apply(null, args); return; }
+  if(cmd === 'hash'){ COMMANDS.hash.apply(null, args); return; }
+  if(cmd === 'keyforge'){ COMMANDS.keyforge(args[0]); return; }
+  if(cmd === 'vault'){ COMMANDS.vault.apply(null, args); return; }
+  if(cmd === 'export'){ COMMANDS.export(); return; }
+  if(cmd === 'import'){ COMMANDS.import(); return; }
+  if(cmd === 'help'){ COMMANDS.help(); return; }
+  if(cmd === 'clear'){ COMMANDS.clear(); return; }
+  if(cmd === 'theme'){ COMMANDS.theme(args[0]); return; }
+  if(cmd === 'uplink'){ COMMANDS.uplink(); return; }
+  if(cmd === 'beacon'){ COMMANDS.beacon(); return; }
+  if(cmd === 'screen'){ COMMANDS.screen(args[0]); return; }
+  if(cmd === 'sysinfo'){ COMMANDS.sysinfo(); return; }
+  if(cmd === 'echo'){ COMMANDS.echo.apply(null, args); return; }
+
+  appendLog(`<div class="small" style="color:var(--warn)">Unknown command: ${esc(raw)} — try "help".</div>`);
+}
+
+/* KEY HANDLING */
+input.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ const v = input.value.trim(); if(v) runCommand(v); input.value=''; }
+  // basic command history: up/down (very small)
+  if(!input._history) input._history = { arr:[], pos:-1 };
+});
+input.addEventListener('keyup', (e)=>{
+  if(e.key === 'ArrowUp' || e.key === 'ArrowDown'){
+    if(!input._history) input._history = { arr:[], pos:-1 };
+    const h = input._history;
+    if(e.key === 'ArrowUp'){ if(h.arr.length && h.pos < h.arr.length-1) h.pos++; input.value = h.arr[h.arr.length-1-h.pos] || ''; }
+    if(e.key === 'ArrowDown'){ if(h.pos>0) h.pos--; else h.pos=-1; input.value = (h.pos===-1 ? '' : h.arr[h.arr.length-1-h.pos]) || ''; }
+  }
+});
+/* push to history on enter */
+(function attachHistory(){
+  const orig = runCommand;
+  runCommand = function(raw){
+    if(raw && raw.trim()){
+      if(!input._history) input._history = { arr:[], pos:-1 };
+      input._history.arr.push(raw.trim());
+      if(input._history.arr.length>100) input._history.arr.shift();
+      input._history.pos = -1;
+    }
+    orig(raw);
+  };
+})();
+
+/* small utilities used by hash md5 fallback */
+function md5(str){
+  // compact md5 (same as earlier) — safe for small strings
+  function rot(n,c){return (n<<c)|(n>>>32-c)}
+  function cmn(q,a,b,x,s,t){a=add32(add32(a,q),add32(x,t));return add32(rot(a,s),b);}
+  function ff(a,b,c,d,x,s,t){return cmn((b & c) | ((~b) & d), a, b, x, s, t);}
+  function gg(a,b,c,d,x,s,t){return cmn((b & d) | (c & (~d)), a, b, x, s, t);}
+  function hh(a,b,c,d,x,s,t){return cmn(b ^ c ^ d, a, b, x, s, t);}
+  function ii(a,b,c,d,x,s,t){return cmn(c ^ (b | (~d)), a, b, x, s, t);}
+  function md5cycle(x,k){let a=x[0], b=x[1], c=x[2], d=x[3];
+    a=ff(a,b,c,d,k[0],7,-680876936); d=ff(d,a,b,c,k[1],12,-389564586); c=ff(c,d,a,b,k[2],17,606105819); b=ff(b,c,d,a,k[3],22,-1044525330);
+    a=ff(a,b,c,d,k[4],7,-176418897); d=ff(d,a,b,c,k[5],12,1200080426); c=ff(c,d,a,b,k[6],17,-1473231341); b=ff(b,c,d,a,k[7],22,-45705983);
+    a=ff(a,b,c,d,k[8],7,1770035416); d=ff(d,a,b,c,k[9],12,-1958414417); c=ff(c,d,a,b,k[10],17,-42063); b=ff(b,c,d,a,k[11],22,-1990404162);
+    a=ff(a,b,c,d,k[12],7,1804603682); d=ff(d,a,b,c,k[13],12,-40341101); c=ff(c,d,a,b,k[14],17,-1502002290); b=ff(b,c,d,a,k[15],22,1236535329);
+    a=gg(a,b,c,d,k[1],5,-165796510); d=gg(d,a,b,c,k[6],9,-1069501632); c=gg(c,d,a,b,k[11],14,643717713); b=gg(b,c,d,a,k[0],20,-373897302);
+    a=gg(a,b,c,d,k[5],5,-701558691); d=gg(d,a,b,c,k[10],9,38016083); c=gg(c,d,a,b,k[15],14,-660478335); b=gg(b,c,d,a,k[4],20,-405537848);
+    a=gg(a,b,c,d,k[9],5,568446438); d=gg(d,a,b,c,k[14],9,-1019803690); c=gg(c,d,a,b,k[3],14,-187363961); b=gg(b,c,d,a,k[8],20,1163531501);
+    a=gg(a,b,c,d,k[13],5,-1444681467); d=gg(d,a,b,c,k[2],9,-51403784); c=gg(c,d,a,b,k[7],14,1735328473); b=gg(b,c,d,a,k[12],20,-1926607734);
+    a=hh(a,b,c,d,k[5],4,-378558); d=hh(d,a,b,c,k[8],11,-2022574463); c=hh(c,d,a,b,k[11],16,1839030562); b=hh(b,c,d,a,k[14],23,-35309556);
+    a=hh(a,b,c,d,k[1],4,-1530992060); d=hh(d,a,b,c,k[4],11,1272893353); c=hh(c,d,a,b,k[7],16,-155497632); b=hh(b,c,d,a,k[10],23,-1094730640);
+    a=hh(a,b,c,d,k[13],4,681279174); d=hh(d,a,b,c,k[0],11,-358537222); c=hh(c,d,a,b,k[3],16,-722521979); b=hh(b,c,d,a,k[6],23,76029189);
+    a=hh(a,b,c,d,k[9],4,-640364487); d=hh(d,a,b,c,k[12],11,-421815835); c=hh(c,d,a,b,k[15],16,530742520); b=hh(b,c,d,a,k[2],23,-995338651);
+    a=ii(a,b,c,d,k[0],6,-198630844); d=ii(d,a,b,c,k[7],10,1126891415); c=ii(c,d,a,b,k[14],15,-1416354905); b=ii(b,c,d,a,k[5],21,-57434055);
+    a=ii(a,b,c,d,k[12],6,1700485571); d=ii(d,a,b,c,k[3],10,-1894986606); c=ii(c,d,a,b,k[10],15,-1051523); b=ii(b,c,d,a,k[1],21,-2054922799);
+    a=ii(a,b,c,d,k[8],6,1873313359); d=ii(d,a,b,c,k[15],10,-30611744); c=ii(c,d,a,b,k[6],15,-1560198380); b=ii(b,c,d,a,k[13],21,1309151649);
+    a=ii(a,b,c,d,k[4],6,-145523070); d=ii(d,a,b,c,k[11],10,-1120210379); c=ii(c,d,a,b,k[2],15,718787259); b=ii(b,c,d,a,k[9],21,-343485551);
+    x[0]=add32(a,x[0]); x[1]=add32(b,x[1]); x[2]=add32(c,x[2]); x[3]=add32(d,x[3]);
+  }
+  function md5blk(s){ const md5blks=[]; for(let i=0;i<64;i+=4){ md5blks[i>>2]=s.charCodeAt(i) + (s.charCodeAt(i+1)<<8) + (s.charCodeAt(i+2)<<16) + (s.charCodeAt(i+3)<<24); } return md5blks; }
+  function md51(s){ let n=s.length, state=[1732584193,-271733879,-1732584194,271733878], i; for(i=64;i<=n;i+=64)md5cycle(state,md5blk(s.substring(i-64,i))); s=s.substring(i-64); const tail = new Array(16).fill(0); for(i=0;i<s.length;i++) tail[i>>2] |= s.charCodeAt(i) << ((i%4)<<3); tail[i>>2] |= 0x80 << ((i%4)<<3); if(i>55){ md5cycle(state,tail); for(i=0;i<16;i++) tail[i]=0; } tail[14]=n*8; md5cycle(state,tail); return state; }
+  function rhex(n){ const s='0123456789abcdef'; let j, str=''; for(j=0;j<4;j++) str+=s.charAt((n>>(j*8+4))&0x0F)+s.charAt((n>>(j*8))&0x0F); return str; }
+  function hex(x){ for(let i=0;i<x.length;i++) x[i]=rhex(x[i]); return x.join(''); }
+  function add32(a,b){ return (a+b) & 0xFFFFFFFF; }
+  return hex(md51(str));
+}
+
+/* INITIAL LOG */
+appendLog(`<div class="small">Welcome. Type "help" to see available commands.</div>`);
+updateVault();
+updateCounts();
+
+/* expose for console */
+window.runCommand = runCommand;
+</script>
+</body>
+</html>
