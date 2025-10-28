@@ -19,7 +19,16 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:radial-gradient(1200px 800px at 10% -10%, #0b1b33 0,#06080f 45%); background-attachment: fixed;}
 body{color:var(--ink);font-family:var(--sans);}
+<div id="loadingScreen" style="
+  position:fixed;inset:0;background:#010409;display:flex;align-items:center;justify-content:center;
+  font-family:monospace;color:#2fff88;font-size:22px;z-index:9999;">
+  <span>Initializing Phantom Systems<span class="cursor">_</span></span>
+</div>
+<script>
+setTimeout(()=>document.getElementById('loadingScreen').remove(),1800);
+</script>
 
+  
 .app{min-height:100vh;display:flex;flex-direction:column}
 .nav{
   height:56px;display:flex;align-items:center;gap:12px;padding:8px 14px;
@@ -1040,4 +1049,5 @@ window.runCommand = runCommand;
 </script>
 </body>
 </html>
+
 
